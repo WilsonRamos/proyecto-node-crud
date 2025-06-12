@@ -61,16 +61,17 @@ router.post('/', async (req, res) => {
         });
     }
 
-    const newBook = new Book()
-    {
+    const newBook = new Book({
         title,
         author,
-        genre,publication_date
-    }
+        genre,
+        publication_date
+    });
+    
 
     try {
-        const newBook = await book.save()
-        res.status(201).json(newBook)
+        const saveBook = await newBook.save()
+        res.status(201).json(saveBook)
         
     } catch (error) {
         res.status(400).json({message : error.message})

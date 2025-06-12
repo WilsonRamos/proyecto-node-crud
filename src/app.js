@@ -4,7 +4,7 @@ const bodyParser = require('body-parser')
 const { config } = require("dotenv")
 
 config()
-const boolRoutes = require('./routes/book.routers')
+const bookRouters = require('./routes/book.routers')
 
 const app = express()
 app.use(bodyParser.json()) //Parseador de bodies
