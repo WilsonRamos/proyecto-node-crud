@@ -30,7 +30,7 @@ const getBook = async (req, res, next) => {
             // Si hay algún error, responde con un error 500 (servidor interno)
             res.status(500).json({ message: error.message });
         }
-      res.book = book;
+      req.book = book;
       next(); 
 };
 
@@ -80,6 +80,43 @@ router.post('/', async (req, res) => {
     // Aquí se puede agregar el código para guardar el libro en la base de datos, por ejemplo:
     // const newBook = new Book({ title, author, genre, publication_date });
     // newBook.save().then(() => res.status(201).json(newBook));
+});
+
+router.get('/:id', getBook, async (req, res) => {
+    res.json(req.book);  // ✅ req para recibir, res para enviar
+});
+
+
+// Rutas usando el middleware corregido
+router.get('/:id', getBook, async (req, res) => {
+    res.json(req.book);  // ✅ Leemos de req, enviamos con res
+});
+
+router.put('/:id', getBook, async (req, res) => {
+    try {
+        const book = req.book;  // ✅ Leemos de req
+        
+        // Actualizamos campos si vienen en el body
+        book.title = req.body.title || book.title;
+        book.author = req.body.author || book.author;
+        book.genre = req.body.genre || book.genre;
+        book.publication_date = req.body.publication_date || book.publication_date;
+        
+        const updatedBook = await book.save();
+        res.json(updatedBook);  // ✅ Enviamos con res
+        
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+router.delete('/:id', getBook, async (req, res) => {
+    try {
+        await req.book.remove();  // ✅ Leemos de req
+        res.json({ message: 'Libro eliminado' });  // ✅ Enviamos con res
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
 
 module.exports = router;
