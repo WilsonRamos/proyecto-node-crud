@@ -82,11 +82,6 @@ router.post('/', async (req, res) => {
     // newBook.save().then(() => res.status(201).json(newBook));
 });
 
-router.get('/:id', getBook, async (req, res) => {
-    res.json(req.book);  // ✅ req para recibir, res para enviar
-});
-
-
 // Rutas usando el middleware corregido
 router.get('/:id', getBook, async (req, res) => {
     res.json(req.book);  // ✅ Leemos de req, enviamos con res
@@ -109,11 +104,38 @@ router.put('/:id', getBook, async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+router.patch('/:id', getBook, async (req, res) => {
+    // Verificar que al menos uno de los campos esté presente
+    if (!req.body.title && !req.body.author && !req.body.genre && !req.body.publication_date) {
+        return res.status(400).json({
+            message: 'Al menos uno de estos campos debe ser enviado: Título, Autor, Género o fecha de publicación'
+        });
+    }
+
+    try {
+        const book = req.book;  // ← Cambiar res.book por req.book
+        
+        // Actualizar solo los campos que fueron enviados
+        if (req.body.title !== undefined) book.title = req.body.title;
+        if (req.body.author !== undefined) book.author = req.body.author;
+        if (req.body.genre !== undefined) book.genre = req.body.genre;
+        if (req.body.publication_date !== undefined) book.publication_date = req.body.publication_date;
+        
+        const updatedBook = await book.save();
+        res.json(updatedBook);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
 
 router.delete('/:id', getBook, async (req, res) => {
     try {
-        await req.book.remove();  // ✅ Leemos de req
-        res.json({ message: 'Libro eliminado' });  // ✅ Enviamos con res
+        await req.book.deleteOne({
+            _id: book._id
+        });  // ← Cambiar por req.book
+        res.json({ message: 'Libro eliminado' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
